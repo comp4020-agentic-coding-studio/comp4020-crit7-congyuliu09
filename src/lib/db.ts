@@ -1,10 +1,10 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import Database from "better-sqlite3";
-import { asc } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { type Booking, type Room, rooms } from "./schema";
+import { type Booking, type Room, bookings, rooms } from "./schema";
 
 // One SQLite file is the app's whole persistent state. In production
 // fly.toml points DATABASE_PATH at the machine's volume (/data), which is
@@ -74,4 +74,42 @@ export type { Room, Booking };
 
 export function listRooms(): Room[] {
   return db.select().from(rooms).orderBy(asc(rooms.building), asc(rooms.roomName)).all();
+}
+
+export function listBookingsForRoomOnDate(roomId: number, date: string): Booking[] {
+  return db
+    .select()
+    .from(bookings)
+    .where(and(eq(bookings.roomId, roomId), eq(bookings.date, date)))
+    .orderBy(asc(bookings.startTime))
+    .all();
+}
+
+export type NewBooking = {
+  roomId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  studentId: string;
+};
+
+export type CreateBookingResult =
+  | { ok: true; booking: Booking }
+  | { ok: false; error: "invalid" | "conflict" };
+
+// The one place double-booking is prevented: two bookings for the same room
+// and date conflict unless one ends at or before the other starts. Checked
+// here (not just relied on client-side) so a raced or scripted request can't
+// slip a conflicting booking past the UI.
+export function createBooking(input: NewBooking): CreateBookingResult {
+  if (input.startTime >= input.endTime) return { ok: false, error: "invalid" };
+
+  const existing = listBookingsForRoomOnDate(input.roomId, input.date);
+  const conflicts = existing.some(
+    (booking) => input.startTime < booking.endTime && input.endTime > booking.startTime,
+  );
+  if (conflicts) return { ok: false, error: "conflict" };
+
+  const booking = db.insert(bookings).values(input).returning().get();
+  return { ok: true, booking };
 }

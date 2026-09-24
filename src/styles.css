@@ -112,3 +112,38 @@ button.secondary {
   color: #4a4a4a;
   font-size: 0.9rem;
 }
+
+.room-name {
+  font-size: 1rem;
+}
+
+.date-filter {
+  margin-block: 1rem 1.5rem;
+}
+
+.error-banner {
+  background: #fdecea;
+  border: 1px solid #e0a3a3;
+  color: #7a1f1f;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.4rem;
+}
+
+.booked-list {
+  margin: 0.6rem 0 0;
+  padding-inline-start: 1.1rem;
+  color: #7a1f1f;
+  font-size: 0.85rem;
+}
+
+.room-card form {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  margin-block: 1rem 0;
+}
+
+.room-card label {
+  font-size: 0.8rem;
+  color: #4a4a4a;
+}

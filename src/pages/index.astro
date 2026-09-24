@@ -1,8 +1,20 @@
 ---
-import { listRooms } from "../lib/db";
+import { listBookingsForRoomOnDate, listRooms } from "../lib/db";
 import "../styles.css";
 
 const rooms = listRooms();
+const today = new Date().toISOString().slice(0, 10);
+const date = Astro.url.searchParams.get("date") || today;
+const error = Astro.url.searchParams.get("error");
+
+const bookingsByRoom = new Map(
+  rooms.map((room) => [room.id, listBookingsForRoomOnDate(room.id, date)]),
+);
+
+const errorMessages: Record<string, string> = {
+  conflict: "That room is already booked for part of that time — pick another time or room.",
+  invalid: "Please fill in every field, with a start time before the end time.",
+};
 ---
 
 <!doctype html>
@@ -24,18 +36,64 @@ const rooms = listRooms();
       <a href="/readme/">About</a>
     </nav>
     <main>
+      <form method="get" action="/" class="date-filter">
+        <label for="date-filter">Show availability for</label>
+        <input type="date" id="date-filter" name="date" value={date} />
+        <button class="secondary">View</button>
+      </form>
+
+      {
+        error && (
+          <p role="alert" class="error-banner">
+            {errorMessages[error] ?? "Something went wrong. Please try again."}
+          </p>
+        )
+      }
+
       <h2>Available rooms</h2>
       <ul class="room-list">
         {
-          rooms.map((room) => (
-            <li class="room-card">
-              <p class="room-name">{room.roomName}</p>
-              <p class="room-building">{room.building}</p>
-              <p class="room-meta">
-                {room.roomType} · seats {room.capacity}
-              </p>
-            </li>
-          ))
+          rooms.map((room) => {
+            const roomBookings = bookingsByRoom.get(room.id) ?? [];
+            return (
+              <li class="room-card">
+                <h3 class="room-name">{room.roomName}</h3>
+                <p class="room-building">{room.building}</p>
+                <p class="room-meta">
+                  {room.roomType} · seats {room.capacity}
+                </p>
+                {roomBookings.length > 0 ? (
+                  <ul class="booked-list">
+                    {roomBookings.map((booking) => (
+                      <li>
+                        Booked {booking.startTime}–{booking.endTime}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="room-meta">No bookings yet for {date}.</p>
+                )}
+                <form method="post" action="/api/bookings">
+                  <input type="hidden" name="roomId" value={room.id} />
+                  <label for={`date-${room.id}`}>Date</label>
+                  <input type="date" id={`date-${room.id}`} name="date" value={date} required />
+                  <label for={`start-${room.id}`}>Start</label>
+                  <input type="time" id={`start-${room.id}`} name="startTime" required />
+                  <label for={`end-${room.id}`}>End</label>
+                  <input type="time" id={`end-${room.id}`} name="endTime" required />
+                  <label for={`student-${room.id}`}>Student ID</label>
+                  <input
+                    id={`student-${room.id}`}
+                    name="studentId"
+                    placeholder="u1234567"
+                    maxlength="40"
+                    required
+                  />
+                  <button>Book this room</button>
+                </form>
+              </li>
+            );
+          })
         }
       </ul>
     </main>
