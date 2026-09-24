@@ -7,9 +7,10 @@ function withQuery(path: string, params: Record<string, string>): string {
 }
 
 // A plain HTML form POSTs here and follows the 303 redirect back — the core
-// booking flow needs no client-side JavaScript. Either way it redirects back
-// to the room list on the same date, with an `error` the page reads and
-// displays next to the room on failure.
+// booking flow needs no client-side JavaScript. A conflicting or invalid
+// submission redirects back to the room list with an `error` it displays;
+// a good one goes to My Bookings, so the student immediately sees what they
+// just booked persisted.
 export const POST: APIRoute = async ({ request, redirect }) => {
   const form = await request.formData();
   const roomId = Number(form.get("roomId"));
@@ -27,5 +28,5 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     return redirect(withQuery("/", { date, error: result.error }), 303);
   }
 
-  return redirect(withQuery("/", { date }), 303);
+  return redirect(withQuery("/bookings/", { studentId }), 303);
 };

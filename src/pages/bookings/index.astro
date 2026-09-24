@@ -1,0 +1,74 @@
+---
+import { listBookingsForStudent } from "../../lib/db";
+import "../../styles.css";
+
+const studentId = Astro.url.searchParams.get("studentId")?.trim() ?? "";
+const error = Astro.url.searchParams.get("error");
+const myBookings = studentId ? listBookingsForStudent(studentId) : [];
+
+const errorMessages: Record<string, string> = {
+  not_found: "That booking couldn't be cancelled — check the Student ID matches.",
+};
+---
+
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ANU RoomFlow — My bookings</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <p class="eyebrow">ANU RoomFlow</p>
+      <h1>My bookings</h1>
+      <p class="subtitle">Look up and cancel your bookings by Student ID.</p>
+    </header>
+    <nav aria-label="site">
+      <a href="/">Book a room</a>
+      <a href="/bookings/" aria-current="page">My bookings</a>
+      <a href="/readme/">About</a>
+    </nav>
+    <main>
+      <form method="get" action="/bookings/" class="date-filter">
+        <label for="studentId">Student ID</label>
+        <input id="studentId" name="studentId" value={studentId} placeholder="u1234567" required />
+        <button class="secondary">View</button>
+      </form>
+
+      {
+        error && (
+          <p role="alert" class="error-banner">
+            {errorMessages[error] ?? "Something went wrong. Please try again."}
+          </p>
+        )
+      }
+
+      {
+        studentId &&
+          (myBookings.length > 0 ? (
+            <>
+              <h2>Your bookings</h2>
+              <ul class="room-list">
+                {myBookings.map((booking) => (
+                  <li class="room-card">
+                    <h3 class="room-name">{booking.room.roomName}</h3>
+                    <p class="room-building">{booking.room.building}</p>
+                    <p class="room-meta">
+                      {booking.date}, {booking.startTime}–{booking.endTime}
+                    </p>
+                    <form method="post" action={`/api/bookings/${booking.id}/cancel`}>
+                      <input type="hidden" name="studentId" value={studentId} />
+                      <button class="secondary">Cancel booking</button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p>No bookings found for {studentId}.</p>
+          ))
+      }
+    </main>
+  </body>
+</html>

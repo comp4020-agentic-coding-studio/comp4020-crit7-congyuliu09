@@ -113,3 +113,33 @@ export function createBooking(input: NewBooking): CreateBookingResult {
   const booking = db.insert(bookings).values(input).returning().get();
   return { ok: true, booking };
 }
+
+export type BookingWithRoom = Booking & { room: Room };
+
+export function listBookingsForStudent(studentId: string): BookingWithRoom[] {
+  const studentBookings = db
+    .select()
+    .from(bookings)
+    .where(eq(bookings.studentId, studentId))
+    .orderBy(asc(bookings.date), asc(bookings.startTime))
+    .all();
+
+  const roomsById = new Map(listRooms().map((room) => [room.id, room]));
+  return studentBookings.map((booking) => ({
+    ...booking,
+    room: roomsById.get(booking.roomId) as Room,
+  }));
+}
+
+export type CancelResult = { ok: true } | { ok: false; error: "not_found" };
+
+// Ownership without a login: only deletes when the posted Student ID matches
+// the booking's own, so cancelling requires knowing the ID it was booked
+// under, not just the booking's id.
+export function cancelBooking(id: number, studentId: string): CancelResult {
+  const result = db
+    .delete(bookings)
+    .where(and(eq(bookings.id, id), eq(bookings.studentId, studentId)))
+    .run();
+  return result.changes > 0 ? { ok: true } : { ok: false, error: "not_found" };
+}
