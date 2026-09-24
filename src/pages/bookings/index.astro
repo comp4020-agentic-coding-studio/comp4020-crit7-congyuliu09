@@ -59,7 +59,7 @@ const errorMessages: Record<string, string> = {
                     </p>
                     <form method="post" action={`/api/bookings/${booking.id}/cancel`}>
                       <input type="hidden" name="studentId" value={studentId} />
-                      <button class="secondary">Cancel booking</button>
+                      <button class="danger">Cancel booking</button>
                     </form>
                   </li>
                 ))}

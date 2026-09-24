@@ -47,10 +47,22 @@ a {
   color: #00539f;
 }
 
+a:hover {
+  color: #003b73;
+}
+
 nav a[aria-current="page"] {
   font-weight: 600;
   color: #1a1a1a;
   text-decoration: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #00539f;
+  outline-offset: 2px;
 }
 
 form {
@@ -81,9 +93,27 @@ button {
   cursor: pointer;
 }
 
+button:hover {
+  background: #003b73;
+}
+
 button.secondary {
   background: #d8dde3;
   color: #1a1a1a;
+}
+
+button.secondary:hover {
+  background: #c5cbd3;
+}
+
+button.danger {
+  background: white;
+  color: #7a1f1f;
+  border: 1px solid #e0a3a3;
+}
+
+button.danger:hover {
+  background: #fdecea;
 }
 
 .room-list {
