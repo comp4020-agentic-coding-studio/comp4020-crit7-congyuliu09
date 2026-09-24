@@ -1,18 +1,56 @@
 body {
   margin: 0;
-  padding: 2rem;
+  padding: 0 1.5rem 3rem;
   font-family: system-ui, sans-serif;
   line-height: 1.6;
   color: #1a1a1a;
+  background: #f6f7f9;
 }
 
-main {
-  max-width: 40rem;
-  margin: 0 auto;
+main,
+.site-header,
+nav {
+  max-width: 48rem;
+  margin-inline: auto;
+}
+
+.site-header {
+  padding-block: 2rem 1rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #00539f;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.site-header h1 {
+  margin: 0.2rem 0 0.3rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: #4a4a4a;
+}
+
+nav {
+  display: flex;
+  gap: 1.25rem;
+  padding-block: 0.75rem;
+  border-block: 1px solid #dcdfe4;
 }
 
 a {
-  color: #0b5fff;
+  color: #00539f;
+}
+
+nav a[aria-current="page"] {
+  font-weight: 600;
+  color: #1a1a1a;
+  text-decoration: none;
 }
 
 form {
@@ -23,18 +61,54 @@ form {
   margin-block: 1.5rem;
 }
 
-input {
+input,
+select {
   flex: 1;
-  min-width: 12rem;
+  min-width: 10rem;
   padding: 0.4rem 0.6rem;
   font: inherit;
+  border: 1px solid #b9bfc7;
+  border-radius: 0.3rem;
 }
 
 button {
-  padding: 0.4rem 1rem;
+  padding: 0.5rem 1.2rem;
   font: inherit;
+  border: none;
+  border-radius: 0.3rem;
+  background: #00539f;
+  color: white;
+  cursor: pointer;
 }
 
-#messages {
-  padding-inline-start: 1.2rem;
+button.secondary {
+  background: #d8dde3;
+  color: #1a1a1a;
+}
+
+.room-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+
+.room-card {
+  background: white;
+  border: 1px solid #dcdfe4;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.room-name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.room-building,
+.room-meta {
+  margin: 0.2rem 0 0;
+  color: #4a4a4a;
+  font-size: 0.9rem;
 }
